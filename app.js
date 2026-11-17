@@ -147,6 +147,11 @@ function guessType(n) {
   return ({ mp3: 'audio/mpeg', m4a: 'audio/mp4', mp4: 'audio/mp4', aac: 'audio/aac', wav: 'audio/wav', flac: 'audio/flac', ogg: 'audio/ogg', oga: 'audio/ogg', opus: 'audio/ogg', aif: 'audio/aiff', aiff: 'audio/aiff', caf: 'audio/x-caf' })[e] || 'audio/mpeg';
 }
 
+/* ---------- чистка названий от приписок сайтов ---------- */
+const JUNK = /\s*[\(\[\{][^\)\]\}]*?(\.(me|ru|net|com|org|info|cc|fm|biz|su|kz|pro|io|top|mobi|club|online|site|xyz|ws|tv|by|ua)\b|sefon|zaycev|muzofond|hitmo|drivemusic|mp3party|musify|ru\.music)[^\)\]\}]*[\)\]\}]\s*/gi;
+const JUNK_TAIL = /\s*[-–—|]\s*[\w.-]+\.(me|ru|net|com|org|info|cc|fm|biz|su|kz|pro|io|top|mobi|club|online|site|xyz)\s*$/i;
+function cleanName(x) { if (!x) return x; const c = x.replace(JUNK, ' ').replace(JUNK_TAIL, '').replace(/\s{2,}/g, ' ').trim(); return c || x; }
+
 /* ---------- запись (импорт) ---------- */
 async function importFiles(files) {
   const list = Array.from(files).filter(f => (f.type && f.type.startsWith('audio')) || AUDIO_EXT.test(f.name));
@@ -165,6 +170,7 @@ async function importFiles(files) {
       const base = f.name.replace(/\.[^.]+$/, '').replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
       let title = tags.title, artist = tags.artist || '';
       if (!title) { const m = base.split(/\s+[-–—]\s+/); if (m.length > 1) { artist = artist || m[0]; title = m.slice(1).join(' - '); } else title = base; }
+      title = cleanName(title); artist = cleanName(artist);
       const id = uid('t');
       const t = { id, title, artist, dur, fname: f.name, size: f.size, type, added: Date.now(), card: CARDS[hash(id) % CARDS.length], loop: false, cover: tags.cover || null, origCover: tags.cover || null };
       await putAudio(id, blob);
@@ -544,7 +550,7 @@ $('#mPl').addEventListener('click', () => {
   draw();
   $('#dlgBody').onclick = async (e) => {
     const b = e.target.closest('.pick'); if (!b) return;
-    if (b.dataset.new) { newPlaylist(async (p) => { p.tracks.push(id); await saveLists(); renderPlaylists(); toast('Добавил в «' + p.name + '»'); }); return; }
+    if (b.dataset.new) { newPlaylist(async (p) => { p.tracks.push(id); await saveLists(); renderPlaylists(); toast('Добавил в «' + p.name + '»'); setTimeout(() => $('#mPl').click(), 60); }); return; }
     const p = S.playlists.find(x => x.id === b.dataset.pl); if (!p) return;
     if (p.tracks.includes(id)) { p.tracks = p.tracks.filter(x => x !== id); toast('Убрал из «' + p.name + '»'); }
     else { p.tracks.push(id); toast('Добавил в «' + p.name + '»'); }
@@ -600,8 +606,22 @@ document.addEventListener('click', unlock, { capture: true });
 
 /* ---------- плеер ---------- */
 const cass = $('#cass'), door = $('#door');
-function fitStage() { const b = $('#stageBox'); const w = b.clientWidth || window.innerWidth, h = b.clientHeight || window.innerHeight; const s = Math.min(w / 390, h / 844); $('#stage').style.setProperty('--s', s.toFixed(4)); }
-window.addEventListener('resize', fitStage); window.addEventListener('orientationchange', () => setTimeout(fitStage, 300)); fitStage(); setTimeout(fitStage, 300);
+function fitStage() {
+  const b = $('#stageBox'); const w = b.clientWidth || window.innerWidth, h = b.clientHeight || window.innerHeight;
+  if (!w || !h) return;
+  // ширина деки с клавишами ≈ 366px + поля; высота подстраивается под экран за счёт динамика
+  const s = Math.min(w / 384, h / 700);
+  const H = Math.max(700, Math.min(h / s, 1000));
+  const st = $('#stage'); st.style.height = H + 'px'; st.style.setProperty('--s', s.toFixed(4));
+  $('#pBody').style.height = (H - 32) + 'px';
+  $('#pGrille').style.height = Math.max(60, H - 32 - 540 - 18) + 'px';
+}
+const refit = () => { fitStage(); requestAnimationFrame(fitStage); [120, 350, 700].forEach(t => setTimeout(fitStage, t)); };
+window.addEventListener('resize', refit); window.addEventListener('orientationchange', refit);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', refit);
+if (window.ResizeObserver) new ResizeObserver(() => fitStage()).observe($('#stageBox'));
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refit(); });
+fitStage(); setTimeout(fitStage, 300);
 function openPlayer() { fitStage(); S.playerOpen = true; $('#player').classList.add('open'); }
 function closePlayer() { S.playerOpen = false; $('#player').classList.remove('open'); }
 $('#pBack').addEventListener('click', closePlayer);
@@ -868,6 +888,10 @@ $('#fileIn').addEventListener('change', (e) => { const fs = e.target.files; if (
     const order = (await kvGet('order')) || [];
     S.order = order.filter(id => S.tracks.has(id));
     all.sort((a, b) => b.added - a.added).forEach(t => { if (!S.order.includes(t.id)) S.order.push(t.id); });
+    if (!(await kvGet('cleaned1'))) {
+      for (const t of S.tracks.values()) { const a = cleanName(t.title), b = cleanName(t.artist); if (a !== t.title || b !== t.artist) { t.title = a; t.artist = b; await putTrack(t); } }
+      await kvSet('cleaned1', true);
+    }
     S.playlists = (await kvGet('playlists')) || [];
     S.recent = (await kvGet('recent')) || [];
   } catch (e) { console.error(e); toast('Не смог прочитать полку'); }
