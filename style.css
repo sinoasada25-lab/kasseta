@@ -1,3 +1,4 @@
+:root{--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);--sar:env(safe-area-inset-right,0px)}
 
 body{margin:0;background:#0b0a09}
 a{color:#ffb347}a:hover{color:#ffd9a0}
@@ -114,12 +115,12 @@ button{font:inherit;-webkit-tap-highlight-color:transparent}
 #screens{position:absolute;inset:0;overflow:hidden;touch-action:pan-y}
 #track{position:absolute;top:0;left:0;height:100%;width:300%;display:flex;transition:transform .45s cubic-bezier(.2,.8,.2,1);will-change:transform}
 .screen{position:relative;width:33.3334%;height:100%;display:flex;flex-direction:column;overflow:hidden}
-.hdr{position:relative;flex-shrink:0;height:calc(118px + env(safe-area-inset-top));overflow:hidden;border-bottom:2px solid #000}
+.hdr{position:relative;flex-shrink:0;height:calc(118px + var(--sat));overflow:hidden;border-bottom:2px solid #000}
 .hdr-in{position:absolute;left:22px;bottom:36px;display:flex;flex-direction:column;gap:4px}
 .hdr .dymo{position:absolute;right:22px;bottom:44px;font-size:13px;transform:rotate(-1.5deg)}
 .hdr .rainbow{position:absolute;left:0;right:0;bottom:12px}
-.content{position:relative;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 12px calc(128px + env(safe-area-inset-bottom));box-sizing:border-box}
-.tabs{position:fixed !important;height:calc(100px + env(safe-area-inset-bottom)) !important;padding:10px 16px calc(14px + env(safe-area-inset-bottom)) !important;z-index:40}
+.content{position:relative;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 12px calc(128px + var(--sab));box-sizing:border-box}
+.tabs{position:fixed !important;height:calc(100px + var(--sab)) !important;padding:10px 16px calc(14px + var(--sab)) !important;z-index:40}
 .tab{background:none;border:0;padding:0;cursor:pointer}
 .shelf{display:flex;flex-direction:column;gap:8px;padding:10px 8px;min-height:120px;background:#0f0e0d;border:1px solid #000;border-radius:3px;box-shadow:inset 0 6px 14px rgba(0,0,0,.9);position:relative}
 .spine{touch-action:pan-y;will-change:transform}
@@ -139,7 +140,7 @@ button{font:inherit;-webkit-tap-highlight-color:transparent}
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:12px 10px;background:#0f0e0d;border:1px solid #000;border-radius:3px;box-shadow:inset 0 6px 14px rgba(0,0,0,.9)}
 .j-teal{background:repeating-linear-gradient(0deg,#1d6f6a 0 9px,#e9dfc6 9px 12px)}
 .j-red{background:linear-gradient(90deg,#151515 0 22%,#b8241b 22% 30%,#e9dfc6 30%)}
-#plView{position:absolute;left:0;right:0;bottom:0;top:calc(118px + env(safe-area-inset-top));transform:translateX(102%);transition:transform .4s cubic-bezier(.2,.8,.2,1);z-index:5;display:flex;flex-direction:column}
+#plView{position:absolute;left:0;right:0;bottom:0;top:calc(118px + var(--sat));transform:translateX(102%);transition:transform .4s cubic-bezier(.2,.8,.2,1);z-index:5;display:flex;flex-direction:column}
 #plView.open{transform:translateX(0)}
 .pl-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 4px 12px}
 .rec-wrap{position:relative;height:300px;border-radius:4px;border:1px solid #2a2b2c;overflow:hidden}
@@ -152,7 +153,7 @@ button{font:inherit;-webkit-tap-highlight-color:transparent}
 .dome .lbl{font-family:Oswald,sans-serif;font-weight:700;font-size:13px;letter-spacing:3px;color:#fff2ee;text-shadow:0 -1px 0 rgba(0,0,0,.5)}
 #sheetOv{position:fixed;inset:0;background:rgba(5,4,3,.72);opacity:0;pointer-events:none;transition:opacity .3s;z-index:70}
 #sheetOv.open{opacity:1;pointer-events:auto}
-#sheet{position:fixed;left:0;right:0;bottom:0;z-index:71;border-top:2px solid #111;border-radius:6px 6px 0 0;transform:translateY(105%);transition:transform .45s cubic-bezier(.2,.8,.2,1);padding:18px 18px calc(22px + env(safe-area-inset-bottom));box-sizing:border-box;overflow:hidden;max-height:92vh;overflow-y:auto}
+#sheet{position:fixed;left:0;right:0;bottom:0;z-index:71;border-top:2px solid #111;border-radius:6px 6px 0 0;transform:translateY(105%);transition:transform .45s cubic-bezier(.2,.8,.2,1);padding:18px 18px calc(22px + var(--sab));box-sizing:border-box;overflow:hidden;max-height:92vh;overflow-y:auto}
 #sheet.open{transform:translateY(0)}
 .sheet-top{display:flex;justify-content:center;margin-bottom:14px;position:relative}
 .sheet-info{display:flex;gap:18px;align-items:center;margin:0 6px 14px;position:relative}
@@ -173,14 +174,14 @@ button{font:inherit;-webkit-tap-highlight-color:transparent}
 .pick{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;padding:0 12px;margin-bottom:8px;box-sizing:border-box}
 .pick .chk{width:18px;height:18px;border:2px solid #2a2c2e;border-radius:2px;background:#f4f5f6;box-shadow:inset 0 1px 2px rgba(0,0,0,.4)}
 .pick.on .chk{background:#2a2c2e}
-#dropBar{position:fixed;left:0;right:0;top:0;z-index:50;padding:calc(10px + env(safe-area-inset-top)) 12px 12px;background:rgba(10,9,8,.94);border-bottom:2px solid #000;transform:translateY(-110%);transition:transform .25s}
+#dropBar{position:fixed;left:0;right:0;top:0;z-index:50;padding:calc(10px + var(--sat)) 12px 12px;background:rgba(10,9,8,.94);border-bottom:2px solid #000;transform:translateY(-110%);transition:transform .25s}
 #dropBar.show{transform:translateY(0)}
 #dropBar .targets{display:flex;gap:10px;overflow-x:auto;padding:8px 2px 2px}
 .mini{flex-shrink:0;width:96px;height:62px;position:relative;border-radius:2px;border:1px solid #000;overflow:hidden;box-shadow:0 3px 5px rgba(0,0,0,.8);transition:transform .15s}
 .mini .jl{left:4px;right:4px;top:4px;height:22px;padding:0 5px}
 .mini .jl .hand{font-size:15px}
 .mini.hot{transform:scale(1.1);outline:3px solid #ffb85a;box-shadow:0 0 16px rgba(255,154,31,.7)}
-#toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translate(-50%,-160%);z-index:99;padding:10px 14px;transition:transform .3s;max-width:86vw;box-sizing:border-box}
+#toast{position:fixed;left:50%;top:calc(14px + var(--sat));transform:translate(-50%,-160%);z-index:99;padding:10px 14px;transition:transform .3s;max-width:86vw;box-sizing:border-box}
 #toast.show{transform:translate(-50%,0)}
 #toast span{font-size:10px;line-height:1.6}
 #player{position:fixed;inset:0;z-index:60;transform:translateY(102%);transition:transform .5s cubic-bezier(.2,.8,.2,1);overflow:hidden}
@@ -211,9 +212,9 @@ button{font:inherit;-webkit-tap-highlight-color:transparent}
 
 .xbtn{position:absolute;right:0;top:-4px;width:40px;height:36px !important;padding:0 !important}
 .sheet-top .xbtn{right:-4px}
-#mini{position:fixed;left:10px;right:10px;bottom:calc(108px + env(safe-area-inset-bottom));height:56px;z-index:39;display:none;align-items:center;gap:12px;padding:0 8px 0 10px;box-sizing:border-box;border:1px solid #000;border-radius:4px;box-shadow:0 6px 14px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.12);width:auto}
+#mini{position:fixed;left:10px;right:10px;bottom:calc(108px + var(--sab));height:56px;z-index:39;display:none;align-items:center;gap:12px;padding:0 8px 0 10px;box-sizing:border-box;border:1px solid #000;border-radius:4px;box-shadow:0 6px 14px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.12);width:auto}
 body.has-mini #mini{display:flex}
-body.has-mini .content{padding-bottom:calc(196px + env(safe-area-inset-bottom))}
+body.has-mini .content{padding-bottom:calc(196px + var(--sab))}
 .mini-win{display:flex;align-items:center;gap:0;height:30px;padding:0 4px;background:#0a0a0b;border:2px solid #efe5c9;border-radius:15px;flex-shrink:0;box-shadow:inset 0 0 6px #000}
 .mini-tape{width:18px;height:7px;background:#5a351a;margin:0 -3px}
 .mini-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
@@ -223,3 +224,11 @@ body.has-mini .content{padding-bottom:calc(196px + env(safe-area-inset-bottom))}
 .pick .st{font-family:Oswald,sans-serif;font-size:10px;letter-spacing:1px;padding:3px 6px;border-radius:2px;flex-shrink:0}
 .pick .st.in{background:#2a2c2e;color:#9dff7a}
 .pick .st.out{background:#e9e2d0;color:#2a2c2e;border:1px solid #888}
+
+#stageBox{position:absolute;left:var(--sal);right:var(--sar);top:var(--sat);bottom:var(--sab)}
+.hdr .logo{font-size:min(32px,8.4vw) !important}
+.hdr .dymo{font-size:min(13px,3.4vw) !important;letter-spacing:2px}
+.hdr .engr-l{font-size:min(10px,2.6vw) !important}
+
+#toast{visibility:hidden;transition:transform .3s,visibility 0s .3s}
+#toast.show{visibility:visible;transition:transform .3s}

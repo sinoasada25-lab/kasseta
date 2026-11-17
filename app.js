@@ -600,9 +600,9 @@ document.addEventListener('click', unlock, { capture: true });
 
 /* ---------- плеер ---------- */
 const cass = $('#cass'), door = $('#door');
-function fitStage() { const s = Math.min(window.innerWidth / 390, window.innerHeight / 844); $('#stage').style.setProperty('--s', s.toFixed(4)); }
-window.addEventListener('resize', fitStage); fitStage();
-function openPlayer() { S.playerOpen = true; $('#player').classList.add('open'); }
+function fitStage() { const b = $('#stageBox'); const w = b.clientWidth || window.innerWidth, h = b.clientHeight || window.innerHeight; const s = Math.min(w / 390, h / 844); $('#stage').style.setProperty('--s', s.toFixed(4)); }
+window.addEventListener('resize', fitStage); window.addEventListener('orientationchange', () => setTimeout(fitStage, 300)); fitStage(); setTimeout(fitStage, 300);
+function openPlayer() { fitStage(); S.playerOpen = true; $('#player').classList.add('open'); }
 function closePlayer() { S.playerOpen = false; $('#player').classList.remove('open'); }
 $('#pBack').addEventListener('click', closePlayer);
 $('#vfd').addEventListener('click', () => { if (S.cur) openPlayer(); else { toast('Сначала выбери трек на полке'); } });
@@ -700,7 +700,6 @@ function updateKeys() {
   const on = S.mode === 'play' && !hold;
   $('#vfd').classList.toggle('on', on);
   $('#vfdState').textContent = S.cur ? (hold < 0 || S.anim === 'rew' ? '<< ПЕРЕМОТКА' : hold > 0 ? '>> ВПЕРЁД' : S.mode === 'play' ? '> СЕЙЧАС ИГРАЕТ' : S.mode === 'load' ? '… ВСТАВКА' : S.mode === 'pause' ? '|| ПАУЗА' : '■ СТОП') : '> ВСТАВЬ КАССЕТУ';
-  if ('mediaSession' in navigator && S.cur) navigator.mediaSession.playbackState = S.mode === 'play' ? 'playing' : 'paused';
   renderMini();
 }
 function updateTime() {
@@ -845,15 +844,13 @@ function setMediaMeta(t) {
   try { navigator.mediaSession.metadata = new MediaMetadata({ title: t.title, artist: t.artist || 'Кассета', album: 'Кассета', artwork: art }); } catch (e) { }
 }
 if ('mediaSession' in navigator) {
+  /* Пауза/Play/перемотка на экране блокировки работают нативно (без нашего кода),
+     потому что при паузе iPhone усыпляет приложение и наш код бы не сработал. */
   const ms = navigator.mediaSession;
   const set = (a, f) => { try { ms.setActionHandler(a, f); } catch (e) { } };
-  set('play', () => audio.play().catch(() => { }));
-  set('pause', () => { audio.pause(); setMode('pause'); });
+  ['play', 'pause', 'seekto', 'seekbackward', 'seekforward', 'stop'].forEach(a => set(a, null));
   set('previoustrack', () => prevTrack());
   set('nexttrack', () => nextTrack(false));
-  set('seekbackward', (d) => { audio.currentTime = Math.max(0, audio.currentTime - ((d && d.seekOffset) || 10)); });
-  set('seekforward', (d) => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + ((d && d.seekOffset) || 10)); });
-  set('seekto', (d) => { if (d && d.seekTime != null) audio.currentTime = d.seekTime; });
 }
 
 /* ---------- папка ---------- */
@@ -878,4 +875,11 @@ $('#fileIn').addEventListener('change', (e) => { const fs = e.target.files; if (
   try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (e) { }
 })();
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { }));
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { updateTime(); updateKeys(); } });
+function syncFromAudio() {
+  if (!S.cur || S.silent || S.anim || (S.hold && S.hold.active) || S.mode === 'load') return;
+  if (!audio.paused && S.mode !== 'play') setMode('play');
+  else if (audio.paused && S.mode === 'play') setMode(audio.ended ? 'stop' : 'pause');
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { syncFromAudio(); updateTime(); updateKeys(); } });
+window.addEventListener('pageshow', () => { syncFromAudio(); updateTime(); updateKeys(); });
+window.addEventListener('focus', () => { syncFromAudio(); updateKeys(); });
