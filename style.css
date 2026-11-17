@@ -208,3 +208,18 @@ button{font:inherit;-webkit-tap-highlight-color:transparent}
 #vfd.bare{display:flex}
 .hdr .logo{font-size:32px !important}
 .hdr .dymo{bottom:64px !important}
+
+.xbtn{position:absolute;right:0;top:-4px;width:40px;height:36px !important;padding:0 !important}
+.sheet-top .xbtn{right:-4px}
+#mini{position:fixed;left:10px;right:10px;bottom:calc(108px + env(safe-area-inset-bottom));height:56px;z-index:39;display:none;align-items:center;gap:12px;padding:0 8px 0 10px;box-sizing:border-box;border:1px solid #000;border-radius:4px;box-shadow:0 6px 14px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.12);width:auto}
+body.has-mini #mini{display:flex}
+body.has-mini .content{padding-bottom:calc(196px + env(safe-area-inset-bottom))}
+.mini-win{display:flex;align-items:center;gap:0;height:30px;padding:0 4px;background:#0a0a0b;border:2px solid #efe5c9;border-radius:15px;flex-shrink:0;box-shadow:inset 0 0 6px #000}
+.mini-tape{width:18px;height:7px;background:#5a351a;margin:0 -3px}
+.mini-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.mini-txt .vfd-c{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.mini-txt .vfd-a{font-size:7px}
+.mini-pp{width:46px;height:40px !important;padding:0 !important;flex-shrink:0}
+.pick .st{font-family:Oswald,sans-serif;font-size:10px;letter-spacing:1px;padding:3px 6px;border-radius:2px;flex-shrink:0}
+.pick .st.in{background:#2a2c2e;color:#9dff7a}
+.pick .st.out{background:#e9e2d0;color:#2a2c2e;border:1px solid #888}

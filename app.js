@@ -473,6 +473,7 @@ function dialog(title, bodyHtml, buttons) {
 }
 function closeDialog() { $('#dlgOv').classList.remove('open'); }
 $('#dlgOv').addEventListener('click', (e) => { if (e.target.id === 'dlgOv') closeDialog(); });
+$('#dlgX').addEventListener('click', closeDialog);
 
 /* ---------- меню трека ---------- */
 let delArmed = null;
@@ -497,6 +498,7 @@ function fillMenu() {
 }
 function closeMenu() { $('#sheetOv').classList.remove('open'); $('#sheet').classList.remove('open'); disarmDel(); }
 $('#sheetOv').addEventListener('click', () => { if (Date.now() - S.menuAt > 450) closeMenu(); });
+$('#mClose').addEventListener('click', closeMenu);
 $('#mLoop').addEventListener('click', async () => {
   const t = S.tracks.get(S.menuId); if (!t) return;
   t.loop = !t.loop; await putTrack(t); fillMenu();
@@ -531,7 +533,10 @@ function shrinkImage(file, max) {
 $('#mPl').addEventListener('click', () => {
   const id = S.menuId;
   const draw = () => {
-    let h = S.playlists.map(p => `<button class="chrome-btn pick${p.tracks.includes(id) ? ' on' : ''}" data-pl="${p.id}"><span class="case-name" style="max-width: 220px">${esc(p.name)}</span><span class="chk"></span></button>`).join('');
+    let h = S.playlists.map(p => {
+      const inIt = p.tracks.includes(id);
+      return `<button class="chrome-btn pick" data-pl="${p.id}"><span class="case-name" style="max-width: 170px">${esc(p.name)}</span><span class="st ${inIt ? 'in' : 'out'}">${inIt ? '✓ УЖЕ ТУТ · УБРАТЬ' : '+ ДОБАВИТЬ'}</span></button>`;
+    }).join('');
     h += `<button class="chrome-btn pick" data-new="1"><span>+ Новая кассета</span><span></span></button>`;
     $('#dlgBody').innerHTML = h;
   };
@@ -540,9 +545,11 @@ $('#mPl').addEventListener('click', () => {
   $('#dlgBody').onclick = async (e) => {
     const b = e.target.closest('.pick'); if (!b) return;
     if (b.dataset.new) { newPlaylist(async (p) => { p.tracks.push(id); await saveLists(); renderPlaylists(); toast('Добавил в «' + p.name + '»'); }); return; }
-    const p = S.playlists.find(x => x.id === b.dataset.pl);
-    if (p.tracks.includes(id)) p.tracks = p.tracks.filter(x => x !== id); else p.tracks.push(id);
+    const p = S.playlists.find(x => x.id === b.dataset.pl); if (!p) return;
+    if (p.tracks.includes(id)) { p.tracks = p.tracks.filter(x => x !== id); toast('Убрал из «' + p.name + '»'); }
+    else { p.tracks.push(id); toast('Добавил в «' + p.name + '»'); }
     await saveLists(); renderPlaylists(); draw();
+    const c = $(`.case[data-pl="${p.id}"]`); if (c) restartAnim(c, 'bump');
   };
 });
 $('#mRename').addEventListener('click', () => {
@@ -694,6 +701,7 @@ function updateKeys() {
   $('#vfd').classList.toggle('on', on);
   $('#vfdState').textContent = S.cur ? (hold < 0 || S.anim === 'rew' ? '<< ПЕРЕМОТКА' : hold > 0 ? '>> ВПЕРЁД' : S.mode === 'play' ? '> СЕЙЧАС ИГРАЕТ' : S.mode === 'load' ? '… ВСТАВКА' : S.mode === 'pause' ? '|| ПАУЗА' : '■ СТОП') : '> ВСТАВЬ КАССЕТУ';
   if ('mediaSession' in navigator && S.cur) navigator.mediaSession.playbackState = S.mode === 'play' ? 'playing' : 'paused';
+  renderMini();
 }
 function updateTime() {
   const d = audio.duration && isFinite(audio.duration) ? audio.duration : ((S.tracks.get(S.cur) || {}).dur || 0);
@@ -704,6 +712,23 @@ function updateTime() {
   $('#gKnob').style.left = (d ? clamp(c / d, 0, 1) * w : 0) + 'px';
   $('#vfdTime').textContent = fmt2(c) + ' / ' + fmt2(d);
 }
+function renderMini() {
+  const t = S.tracks.get(S.cur);
+  document.body.classList.toggle('has-mini', !!t);
+  if (!t) return;
+  $('#miniTitle').textContent = (t.title + (t.artist ? ' · ' + t.artist : '')).toUpperCase();
+  const playing = S.mode === 'play';
+  $('#miniIco').innerHTML = playing ? '<rect x="1" y="1" width="4" height="14"></rect><rect x="9" y="1" width="4" height="14"></rect>' : '<path d="M1 1l12 7-12 7z"></path>';
+  $$('#mini .reel').forEach(r => r.setAttribute('class', playing ? 'reel spin' : 'reel'));
+}
+$('#mini').addEventListener('click', (e) => {
+  if (e.target.closest('#miniPP')) {
+    if (S.mode === 'play') { audio.pause(); setMode('pause'); }
+    else if (S.cur) { if (S.mode === 'stop') audio.currentTime = 0; audio.play().catch(() => toast('Нажми ▶ в деке')); }
+    return;
+  }
+  openPlayer();
+});
 function renderNow() {
   const t = S.tracks.get(S.cur);
   $('#vfdTitle').textContent = t ? (t.title + (t.artist ? ' · ' + t.artist : '')).toUpperCase() : '— — —';
