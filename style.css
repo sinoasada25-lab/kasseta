@@ -243,4 +243,4 @@ body.has-mini .content{padding-bottom:calc(196px + var(--sab))}
   #dropBar{left:calc(50% - 260px);right:calc(50% - 260px)}
 }
 
-#pBody{overflow:hidden}
+#pBody > svg:not(.grain){height:100% !important}
